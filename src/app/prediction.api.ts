@@ -7,13 +7,44 @@ interface Prediction {
   output?: string[];
 }
 
-export const createPrediction = async (prompt: string): Promise<Prediction> => {
+export interface PredictionRequest {
+  prompt: string;
+  service: string;
+  negativePrompot?: string;
+  model?: string;
+  width?: number;
+  height?: number;
+  images?: File[];
+}
+
+export const createPrediction = async (request: PredictionRequest): Promise<Prediction> => {
+  const formData = new FormData();
+
+  formData.append('prompt', request.prompt);
+  formData.append('service', request.service);
+
+  if (request.negativePrompot) {
+    formData.append('negativePrompot', request.negativePrompot);
+  }
+  if (request.model) {
+    formData.append('model', request.model);
+  }
+  if (request.width !== undefined) {
+    formData.append('width', request.width.toString());
+  }
+  if (request.height !== undefined) {
+    formData.append('height', request.height.toString());
+  }
+
+  if (request.images) {
+    request.images.forEach((image, index) => {
+      formData.append(`images[${index}]`, image);
+    });
+  }
+
   const response = await fetch(PREDICTION_API, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ prompt }),
+    body: formData,
   });
 
   if (response.status !== 201) {
@@ -24,8 +55,8 @@ export const createPrediction = async (prompt: string): Promise<Prediction> => {
   return response.json();
 };
 
-export const getPredictionStatus = async (id: string): Promise<Prediction> => {
-  const response = await fetch(`${PREDICTION_API}/${id}`);
+export const getPredictionStatus = async ({ id, service }: { id: string; service: string }): Promise<Prediction> => {
+  const response = await fetch(`${PREDICTION_API}/${id}?service=${service}`);
 
   if (response.status !== 200) {
     const errorResponse = await response.json();
@@ -37,13 +68,16 @@ export const getPredictionStatus = async (id: string): Promise<Prediction> => {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export const generateImage = async (prompt: string): Promise<string> => {
+export const generateImage = async (request: PredictionRequest): Promise<string> => {
   try {
-    let prediction = await createPrediction(prompt);
+    let prediction = await createPrediction(request);
 
     while (prediction.status !== 'succeeded' && prediction.status !== 'failed') {
       await sleep(1000);
-      prediction = await getPredictionStatus(prediction.id);
+      prediction = await getPredictionStatus({
+        id: prediction.id,
+        service: request.service,
+      });
     }
     if (prediction.status === 'succeeded' && prediction.output && prediction.output.length > 0) {
       return prediction.output[prediction.output.length - 1];

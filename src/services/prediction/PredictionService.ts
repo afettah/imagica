@@ -12,4 +12,9 @@ export type PredictionResponse = {
 
 export type PredictionRequest = {
   prompt: string;
+  service: string;
+  negativePrompot?: string;
+  model?: string;
+  width?: number;
+  height?: number;
 };

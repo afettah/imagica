@@ -1,11 +1,11 @@
 // ReplicatePredictionService.ts
 import { PredictionRequest, PredictionResponse, PredictionService } from './PredictionService';
 import Replicate from 'replicate';
+import { getModel } from './ReplicateModels';
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
-const model = process.env.REPLICATE_MODEL_VERSION_ID as string;
 
 type Option = Parameters<typeof replicate.predictions.create>[0];
 
@@ -17,11 +17,11 @@ export class ReplicatePredictionService implements PredictionService {
       throw new Error('The REPLICATE_API_TOKEN environment variable is not set. See README.md for instructions on how to set it.');
     }
 
-    const { prompt } = request;
+    const { prompt, width, height, negativePrompot } = request;
 
     const options: Option = {
-      version: model,
-      input: { prompt },
+      version: getModel(request.model?.toUpperCase() ?? 'DEFAULT'),
+      input: { prompt, width, height, negative_prompt: negativePrompot },
     };
 
     if (WEBHOOK_HOST) {
