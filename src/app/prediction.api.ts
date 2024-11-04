@@ -5,7 +5,6 @@ interface Prediction {
   id: string;
   status: string;
   output?: string[];
-  detail?: string;
 }
 
 export const createPrediction = async (prompt: string): Promise<Prediction> => {
