@@ -1,40 +1,34 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, ImageIcon } from "lucide-react"
-
-// Mock function to simulate image generation
-const generateImage = async (prompt: string): Promise<string> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 2000))
-  // Return a placeholder image URL
-  return `/placeholder.svg?height=512&width=512&text=${encodeURIComponent(prompt)}`
-}
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, ImageIcon } from 'lucide-react';
+import { generateImage } from './prediction.api';
 
 export function ImageGeneratorComponent() {
-  const [prompt, setPrompt] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [prompt, setPrompt] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-    setImageUrl('')
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setImageUrl('');
 
-    try {
-      const url = await generateImage(prompt)
-      setImageUrl(url)
-    } catch (err) {
-      setError('Failed to generate image. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    generateImage(prompt)
+      .then((url) => {
+        setImageUrl(url);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLoading(false);
+      });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -76,5 +70,5 @@ export function ImageGeneratorComponent() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
