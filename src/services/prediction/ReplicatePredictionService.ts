@@ -17,11 +17,17 @@ export class ReplicatePredictionService implements PredictionService {
       throw new Error('The REPLICATE_API_TOKEN environment variable is not set. See README.md for instructions on how to set it.');
     }
 
-    const { prompt, width, height, negativePrompot } = request;
+    const { prompt, width, height, negativePrompot, image } = request;
 
     const options: Option = {
       version: getModel(request.model?.toUpperCase() ?? 'DEFAULT'),
-      input: { prompt, width, height, negative_prompt: negativePrompot },
+      input: {
+        prompt,
+        width,
+        height,
+        negative_prompt: negativePrompot,
+        image,
+      },
     };
 
     if (WEBHOOK_HOST) {

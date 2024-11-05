@@ -17,4 +17,5 @@ export type PredictionRequest = {
   model?: string;
   width?: number;
   height?: number;
+  image?: string
 };

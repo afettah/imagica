@@ -27,6 +27,7 @@ export const ImagesInputComponent = () => {
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
     },
+    multiple: false,
   });
   return (
     <div>
